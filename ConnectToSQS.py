@@ -44,5 +44,37 @@ response = sqs.send_message(
 
 print(response['MessageId'])
 
+##Added Revision One Iteration
+counter=1 
+while True:  # Continuously poll the queue
+    # Receive message from SQS queue
+    response = sqs.receive_message(
+        QueueUrl=queue_url,
+        MaxNumberOfMessages=1,
+        WaitTimeSeconds=5 # Long polling
+    )
+    
+    
+    if counter > 21:
+        break   # break out of the loop after 10 iterations
+    counter = counter + 1   
+
+    if 'Messages' in response:  # when the queue is not empty
+        for message in response['Messages']:
+            print("Message Received: ", message['Body'])
+            print("Message ID: ", message['MessageId'])
+
+            # Process the message
+            # (Your processing logic here)
+
+            # Delete the message from the queue after processing
+            receipt_handle = message['ReceiptHandle']
+            sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
+            )
+            print("Message Deleted!  Counter#" + "{:06}".format(counter) )
+
+    # Implement some break condition or signal handling for a graceful shutdown
 
 
